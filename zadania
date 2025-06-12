@@ -1,0 +1,359 @@
+addMe :: Integer -> Integer -> Integer -- definicja typów funkcji; funkcje w haskell są jednoargumentowe ale tutaj mamy zagnieżdzenie i działa to jak normalna funkcja
+addMe x y = (+) x y                    -- musimy dodać nawiasy (+) żeby działało jako prefiks. samo + nie zadziała; lub po prostu możemy napisać: x + y
+
+main :: IO ()              -- definicja funkcji main
+main = do                  -- dzięki "do" main może mieć kilka linijek; jeżeli jest jedna możemy po prostu napisać: main = print(addMe 10 25)
+  putStr "Sum of x + y = " -- ważne są tu wcięcia, bez nich nie zadziała
+  print(addMe 10 25)
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Napisz następujące funkcje:
+    square, która dla podanej liczby zwróci jej kwadrat.
+    cube, która dla podanej liczby zwróci jej sześcian.
+    average, która przyjmuje dwie liczby i zwraca ich średnią.
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+square :: Integer -> Integer
+square x = x * x
+
+cube :: Integer -> Integer
+cube x = x ^ 3
+
+average :: Double -> Double -> Double
+average x y = (x + y) / 2
+
+main :: IO ()
+main = do
+  print(square 3)
+  print(cube 5)
+  print(average 5 10)
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Napisz kod rozwiązujący równanie kwadratowe. W wersji I wykorzystaj konstrukcję if..else. W wersji II skorzystaj z dozorów/strażników (konstrukcja typu "case").
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+quadratic :: Double -> Double -> Double -> String
+quadratic a b c =
+  let delta = b*b - 4*a*c                    -- konstrukcja "let .. in .." pozwala na definiowanie zmiennych, które później będą dostępne w kodzie poniżej
+  in
+    if delta < 0 then                        -- zwykła konstrukcja "if .. else if .. else ..". jest ona wyrażeniem, więc może być przypisywana do zmiennych
+      "Brak pierwiastków rzeczywistych"
+    else if delta == 0 then
+      let x = (-b) / (2*a)                   -- znowu let .. in
+      in
+        "Jeden pierwiastek: " ++ show x      -- "show" konwertuje zmienną na stringa; za pomocą "++" łączymy stringi
+    else
+      let x1 = ((-b) + sqrt delta) / (2 * a) -- definiowanie wielu zmiennych w jednym "let in", po nowej linii
+          x2 = ((-b) - sqrt delta) / (2 * a)
+      in
+        "Dwa pierwiastki: " ++ show x1 ++ ", " ++ show x2
+
+quadraticCase :: Double -> Double -> Double -> String
+quadraticCase a b c
+  | delta < 0  = "Brak pierwiastków rzeczywistych" -- używamy tu guardów - coś jak switch-case. "| WARUNEK = wartość"
+  | delta == 0 = "Jeden pierwiastek: " ++ show x
+  | otherwise  = "Dwa pierwiastki: " ++ show x1 ++ ", " ++ show x2
+  where                                            -- konstrukcja "where" dołącza podane zmienne do CAŁEJ funkcji (let .. in .. dołącza tylko do kodu poniżej niego). 
+    delta = b*b - 4*a*c                            -- w tym przypadku dołączamy te zmienne do całego guarda, który zwraca jakiegoś stringa zależnie od delty
+    x = (-b) / (2*a)
+    x1 = ((-b) + sqrt delta) / (2 * a)
+    x2 = ((-b) - sqrt delta) / (2 * a)
+
+main :: IO ()
+main = do
+  putStrLn $ quadratic 2 (-7) 3 -- "$" pozwala na usunięcie nawiasów. możemy zamiast tego napisać putStrLn ( ... )
+  putStrLn $ quadratic 4 4 1
+  putStrLn $ quadratic 3 0 2
+
+  putStrLn $ quadraticCase 2 (-7) 3
+  putStrLn $ quadraticCase 4 4 1
+  putStrLn $ quadraticCase 3 0 2
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Zaimplementuj funkcję obliczającą silnię.
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+factorial :: Integer -> Integer
+factorial 0 = 1
+factorial n = n * factorial (n - 1)
+
+main :: IO ()
+main = do
+  putStrLn "Silnia z 5:"
+  print (factorial 5)
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Napisz funkcję wyznaczającą kolejne wyrazy ciągu Fibonacciego.
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+fibonacci :: Int -> [Integer]
+fibonacci n = take n fibs
+  where fibs = 0 : 1 : zipWith (+) fibs (tail fibs)
+
+main :: IO ()
+main = do
+  putStrLn "Pierwsze 10 wyrazów ciągu Fibonacciego:"
+  print (fibonacci 10)
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Napisz funkcję, która pobiera trzy liczby i zwraca różnicę między największą i najmniejszą liczbą.
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+minmax :: (Ord a, Num a) => a -> a -> a -> a
+minmax a b c = maximum [a, b, c] - minimum [a, b, c]
+
+main :: IO ()
+main = do
+  putStrLn "Różnica między największą a najmniejszą z 7, 1, 4:"
+  print (minmax 7 1 4)
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Zaimplementuj funkcję, która pobiera dwie liczby i znajduje sumę ich kwadratów.
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+sumOfSquares :: Num a => a -> a -> a
+sumOfSquares x y = x^2 + y^2
+
+main :: IO ()
+main = do
+  putStrLn "Suma kwadratów 3 i 4:"
+  print (sumOfSquares 3 4)
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Zaimplementuj funkcję zwracającą ostatnią cyfrę danej liczby.
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+lastDigit :: Integer -> Integer
+lastDigit n = abs n `mod` 10
+
+main :: IO ()
+main = do
+  putStrLn "Ostatnia cyfra liczby 42:"
+  print (lastDigit 42)
+  putStrLn "Ostatnia cyfra liczby -17:"
+  print (lastDigit (-17))
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+kw :: Integer -> Integer
+kw x = x*x
+
+main :: IO ()
+main = do
+  -- [0..] oznacza listę nieskończoną od 0. haskell domyślnie nie wczytuje tego wszyskiego do pamięci, tylko wczytuje to, co jest potrzebne.
+  -- take i takeWhile pozwalają na określenie tego, ile elementów wczytać. 
+  -- "take" bierze po prostu X elementów (np. take 10). takeWhile bierze elementy, dopoki warunek jest spełniony (np. takeWhile <50).
+  let x = takeWhile (<50) (map kw [0..]) -- w tym wypadku utworzy nam listę kwadratów dopóki są mniejsze od 50.
+
+  -- możemy poniżej korzystać ze zmiennej "x" bez użycia "let .. in ..", bo użyliśmy w mainie "do".
+  -- bez "do" (jak np. w funkcji kw) dalej musimy używać "let .. in ..".
+  -- "do" działa tylko z monadami (nwm co to, ale np. jest to IO(), Maybe, List, Either). 
+  print(x)
+
+-- haskell domyślnie cache'uje funkcje,
+-- więc wywolując je z tymi samymi parametrami nie oblicza wszystkiego od nowa
+-- tylko zwraca to, co już obliczył i zapisał gdzieś do pamięci.
+-- dzięki temu wiele operacji rekurencyjnych działa szybciej niż np. w C.
+kw :: Integer -> Integer
+kw x = x*x
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+main :: IO ()
+main = do
+  let y = kw (snd ([1..], 5)) -- snd zwraca drugi element krotki (w tym wypadku: 5)
+  print(y)
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- "data" służy do tworzenia własnych typów danych.
+-- tworzymy typ "Tree" z argumentem "a".
+-- "a" służy jako typ generyczny - to może być każdy typ danych, więc drzewo może mieć np. Inty, Stringi itp.
+-- może to być albo "EmptyTree", albo "Node a (Tree a) (Tree a)" - czyli węzeł z jakąś wartością i lewym oraz prawym drzewem.
+data Tree a = EmptyTree | Node a (Tree a) (Tree a) -- tworzymy typ Tree
+
+-- przykładowe drzewo nr 1 - puste drzewo. W definicji funkcji mamy typ Tree Int - ten sam co w "data", tylko pod "a" podstawiliśmy "Int".
+emptyTree :: Tree Int 
+emptyTree = EmptyTree 
+
+-- przykładowe drzewo nr 2 - drzewo z jednym węzłem o wartości 5
+singleNode :: Tree Int 
+singleNode = Node 5 EmptyTree EmptyTree 
+
+-- przykładowe drzewo nr 3 - drzewo z kilkoma węzłami
+--        10
+--       /  \
+--      5    15
+--         /
+--        12
+
+exampleTree :: Tree Int
+exampleTree = Node 10 
+                (Node 5 EmptyTree EmptyTree)    -- lewy węzeł 1. node'a
+                (Node 15                        -- prawy węzeł 1. node'a
+                  (Node 12 EmptyTree EmptyTree) -- lewy węzeł 2. node'a
+                  EmptyTree)                    -- prawy węzeł 2. node'a
+
+-- funkcja sumująca wartości w drzewie
+sumTree :: Num a => Tree a -> a -- przyjmuje "Tree a" i zwraca "a". Nie wiemy, czy "a" jest typem numerycznym (bo może być to wszystko),
+                                -- więc ograniczamy typy do numeryczny używając "Num a =>" przed argumentami.
+sumTree EmptyTree = 0           -- jeżeli podamy puste drzewo, to zwrócimy 0
+sumTree (Node value left right) = value + sumTree left + sumTree right -- jeżeli podamy węzeł, lewo i prawo to zwrócimy wartość + rekurencyjnie kolejne wartości w kolejnych węzłach
+
+main :: IO ()
+main = do
+  print(sumTree exampleTree)
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Napisz funkcję, która pobiera listę i zwraca tę samą listę z elementami w odwróconej kolejności, nie korzystając z gotowej funkcji reverse.
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- funkcja odwracająca elementy w tablicy
+rev' :: [a] -> [a] -> [a] -- przyjmujemy dwie tablice i zwracamy tablicę.
+rev' [] arr = arr         -- jeżeli lewa tablica będzie pusta, to zwrócimy po prostu prawą - bez zmian
+                          -- potrzebujemy powyższego wariantu, ponieważ inaczej rekurencja się nie zatrzyma
+                          -- w haskellu nie ma iteracji po tablicy, więc musimy to tak robić (sad)
+rev' (first:rest) arr = rev' rest (first:arr) -- przyjmujemy: arr arr, ale rozdzielamy pierwszą tablicę na pierwszy element i resztę elementów.
+                                              -- wykonujemy rekurencyjnie to samo, ale z początkowej tablicy usuwamy 1. element i dodajemy go do drugiej.
+                                              -- (first:arr) doda do tablicy "arr" pierwszy element.
+                                              -- (first:rest) rozbija listę bo "first" i "rest" to nie są istniejące wartości.
+                                              -- (first:arr) dodaje do listy, bo "arr" to istniejąca tablica i "first" to istniejąca wartość.
+rev :: [a] -> [a]
+rev arr = rev' arr []
+
+-- czyli stanie się coś takiego: 
+-- [1, 2, 3, 4], [] -- wykonujemy: rev' (first:rest) arr 
+-- [2, 3, 4], [1]   -- wykonujemy: rev' (first:rest) arr 
+-- [3, 4], [2, 1]   -- wykonujemy: rev' (first:rest) arr 
+-- [4], [3, 2, 1]   -- wykonujemy: rev' (first:rest) arr 
+-- [], [4, 3, 2, 1] -- wykonujemy: rev' [] arr <-- koniec rekurencji
+
+main :: IO ()
+main = do
+  let x = [1, 2, 3, 4] -- tworzymy tablicę [1, 2, 3, 4]
+  print(rev x)
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Skorzystaj z mechanizmu składania list w celu utworzenia tabliczki mnożenia. Tabela powinna być listą złożoną z trójelementowych krotek. Pierwsze dwa elementy to liczby z zakresu 1..12, a trzeci to ich iloczyn.
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+fun :: [(Int, Int, Int)]
+fun = [(x, y, x * y) | x <- [1..12], y <- [1..12]]
+
+-- comprehensive array: tworzymy tablice, dopóki warunki się zgadzają
+-- po kolei przejdzie po x = 1, 2, 3, ..., 11, 12
+-- potem po y = 1, 2, 3, ..., 11, 12
+-- i podstawi te wartości
+
+main :: IO ()
+main = do
+  print (fun)
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Napisz funkcję, która generuje dwuelementowe krotki z wszystkimi możliwymi kombinacjami dwóch kolorów ze zbioru {black, white, blue, yellow, red}. Wyeliminuj wyniki typu (red,red) oraz powtórzenia typu (red, yellow) - (yellow, red).
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+colors :: [String]
+colors = ["black", "white", "blue", "yellow", "red"]
+
+combinations :: [String] -> [(String, String)]
+combinations [] = []
+combinations (first:rest) = [(first, x) | x <- rest] ++ combinations rest
+
+-- przechodzimy po kolei po każdym rzędzie i robimy krotki z pozostałymi wartościami
+-- potem tą tablicę łączymy (++) z wynikiem "combinations rest" - czyli kolejnymi rzędami 
+
+main :: IO ()
+main = do
+  print(combinations colors)
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Napisz następujące funkcje dla list:
+a) append l m , która konkatenuje listy l i m,
+b) member x l , która sprawdza, czy x jest elementem listy l,
+c) last l, która znajduje ostatni element w liście,
+d) delete x l, która skasuje element x z listy l 
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+append :: [a] -> [a] -> [a]
+append l m = l ++ m
+
+member :: Eq a => a -> [a] -> Bool -- Eq dodaje wsparcie dla "==" bo nie wiadomo czy "a" ma taki operator
+member x [] = False
+member x (first:rest) = x == first || member x rest
+
+_last :: [a] -> a
+_last [] = error "tablica jest pusta" -- wywalamy errora, tylko dla przypomnienia
+_last (first:[]) = first
+_last (first:rest) = _last rest
+
+-- zamiast (first:[]) możemy użyć [x], które symbolizuje 1 wartość w tablicy
+-- [x, x] symbolizuje 2 wartości w tablicy
+-- itd.
+
+delete :: Eq a => a -> [a] -> [a]
+delete x arr = [y | y <- arr, y /= x]
+
+main :: IO ()
+main = do
+  let a = [1, 2, 3]
+  let b = [4, 5, 6]
+  
+  print (append a b)
+  print (member 4 b)
+  print (_last a)
+  print (delete 4 b)
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+e) split x l , która podzieli listę l do dwóch list l1 i l2. l1 zawiera elementy mniejsze niż x a l2 elementy większe niż x.
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+split :: Ord a => a -> [a] -> ([a], [a])
+split _ [] = ([], [])
+split x (y:ys)
+  | y < x     = (y:lt, gt)
+  | y > x     = (lt, y:gt)
+  | otherwise = (lt, gt)
+  where (lt, gt) = split x ys
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Napisz funkcję filter p l, której wartością zwracaną jest lista wszystkich elementów listy l , które spełnią predykat p. Jaki ma typ funkcja filter?
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+filter' :: (a -> Bool) -> [a] -> [a]
+filter' _ [] = []
+filter' p (x:xs)
+  | p x       = x : filter' p xs
+  | otherwise = filter' p xs
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Napisz funkcję onlyEven, która przyjmuje listę liczb całkowitych i zwraca listę zawierającą tylko liczby parzyste.
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+onlyEven :: [Int] -> [Int]
+onlyEven [] = []
+onlyEven (x:xs)
+  | x `mod` 2 == 0 = x : onlyEven xs
+  | otherwise      = onlyEven xs
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Napisz funkcję doubleAll, która przyjmuje listę liczb całkowitych i zwraca listę, w której każda liczba jest podwojona.
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+doubleAll :: [Int] -> [Int]
+doubleAll [] = []
+doubleAll (x:xs) = (2 * x) : doubleAll xs
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Napisz funkcję sumOfDigits, która dla danej liczby całkowitej zwróci sumę jej cyfr.
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+sumOfDigits :: Int -> Int
+sumOfDigits n = sumDigits (abs n)
+  where
+    sumDigits 0 = 0
+    sumDigits x = (x `mod` 10) + sumDigits (x `div` 10)
+
+main :: IO ()
+main = do
+  putStrLn "Zadanie 6e: split 5 [1,2,6,4,9,3]"
+  print (split 5 [1,2,6,4,9,3]) -- ([1,2,4,3],[6,9])
+
+  putStrLn "Zadanie 7: filter (>3) [1,4,2,5,6]"
+  print (filter' (>3) [1,4,2,5,6]) -- [4,5,6]
+
+  putStrLn "Zadanie 8: onlyEven [1,2,3,4,5,6]"
+  print (onlyEven [1,2,3,4,5,6]) -- [2,4,6]
+
+  putStrLn "Zadanie 9: doubleAll [1,2,3,4]"
+  print (doubleAll [1,2,3,4]) -- [2,4,6,8]
+
+  putStrLn "Zadanie 10: sumOfDigits 12345"
+  print (sumOfDigits 12345) -- 15
